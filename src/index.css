@@ -1,0 +1,141 @@
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+:root {
+  /* Bảng màu HSL cao cấp - Sleek Dark Mode làm mặc định */
+  --primary-hue: 162;
+  --primary-sat: 84%;
+  --primary-lightness: 45%;
+  
+  --primary: hsl(var(--primary-hue), var(--primary-sat), var(--primary-lightness)); /* Emerald #10B981-like */
+  --primary-glow: hsla(var(--primary-hue), var(--primary-sat), var(--primary-lightness), 0.15);
+  --primary-hover: hsl(var(--primary-hue), var(--primary-sat), 38%);
+  
+  --accent: hsl(244, 97%, 66%); /* Indigo/Royal Blue #6366F1 */
+  --accent-glow: hsla(244, 97%, 66%), 0.2;
+  
+  /* Nền và Bảng tối */
+  --bg-dark: #090d16;
+  --bg-app: #0f172a;
+  --bg-card: rgba(30, 41, 59, 0.7);
+  --bg-card-hover: rgba(30, 41, 59, 0.9);
+  --bg-input: rgba(15, 23, 42, 0.6);
+  
+  /* Viền và Bóng đổ */
+  --border-glow: rgba(255, 255, 255, 0.05);
+  --border-active: rgba(16, 185, 129, 0.4);
+  --border-light: rgba(255, 255, 255, 0.08);
+  
+  /* Trạng thái */
+  --status-occupied: #10b981;
+  --status-vacant: #64748b;
+  --status-repairing: #f59e0b;
+  
+  /* Văn bản */
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --text-inverse: #0f172a;
+
+  /* Font gia đình */
+  --font-heading: 'Outfit', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, sans-serif;
+
+  /* Cấu hình cơ bản */
+  font-family: var(--font-sans);
+  color-scheme: dark;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+  
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+}
+
+body {
+  background-color: var(--bg-dark);
+  min-height: 100vh;
+  min-height: 100svh;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+}
+
+#root {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Biểu đồ tròn và thanh cuộn đẹp */
+::-webkit-scrollbar {
+  width: 4px;
+  height: 4px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 99px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+/* Hiệu ứng chuyển động (Keyframes) */
+@keyframes slideUp {
+  from {
+    transform: translateY(20px);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes pulseGlow {
+  0%, 100% {
+    box-shadow: 0 0 15px var(--primary-glow);
+  }
+  50% {
+    box-shadow: 0 0 25px hsla(var(--primary-hue), var(--primary-sat), var(--primary-lightness), 0.3);
+  }
+}
+
+/* Lớp tiện ích hoạt họa */
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+.animate-slide-up {
+  animation: slideUp 0.4s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.tap-effect:active {
+  transform: scale(0.96);
+  opacity: 0.9;
+  transition: transform 0.1s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.tap-effect {
+  transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
