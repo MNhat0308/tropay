@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Plus, X, Calculator, Eye, FileText, CheckCircle2, ChevronRight, Copy, Share2, CornerUpLeft, Camera } from 'lucide-react';
+import { Plus, X, Calculator, Eye, FileText, CheckCircle2, ChevronRight, Copy, Share2, CornerUpLeft, Camera, Search } from 'lucide-react';
 import { apiService } from '../services/apiService';
 
 export default function Bills({ bills, rooms, onSaveBill, onDeleteBill }) {
@@ -34,6 +34,22 @@ export default function Bills({ bills, rooms, onSaveBill, onDeleteBill }) {
   // Các bộ lọc lịch sử hóa đơn
   const [filterRoomId, setFilterRoomId] = useState('all');
   const [filterMonth, setFilterMonth] = useState('all');
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredBills = [...bills]
+    .filter(bill => {
+      const rName = rooms.find(r => r.id === bill.room_id)?.name || '';
+      const matchesRoom = filterRoomId === 'all' || Number(bill.room_id) === Number(filterRoomId);
+      const matchesMonth = filterMonth === 'all' || Number(bill.rent_month) === Number(filterMonth);
+      
+      const query = searchTerm.toLowerCase();
+      const matchesSearch = !searchTerm ||
+        rName.toLowerCase().includes(query) ||
+        (bill.note && bill.note.toLowerCase().includes(query));
+        
+      return matchesRoom && matchesMonth && matchesSearch;
+    })
+    .sort((a, b) => new Date(b.at) - new Date(a.at));
 
   // Các trạng thái cho máy quét chỉ số thông minh bằng AI (OCR)
   const [ocrModalOpen, setOcrModalOpen] = useState(false);
@@ -76,6 +92,14 @@ export default function Bills({ bills, rooms, onSaveBill, onDeleteBill }) {
     setTotalPrice(Number(selectedRoom.price_room || 0) + Number(selectedRoom.price_garbage || 0));
   }, [roomId, rooms, bills]);
 
+  // Mặc định chọn phòng đầu tiên sau khi đã sắp xếp tự nhiên lúc load rooms
+  useEffect(() => {
+    if (rooms.length > 0 && !roomId) {
+      const sorted = [...rooms].sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}));
+      setRoomId(sorted[0].id.toString());
+    }
+  }, [rooms, roomId]);
+
   // Tự động tính lượng tiêu thụ và tổng tiền khi nhập chỉ số mới
   useEffect(() => {
     const elecCons = Math.max(0, Number(newElectric || 0) - Number(oldElectric || 0));
@@ -91,10 +115,10 @@ export default function Bills({ bills, rooms, onSaveBill, onDeleteBill }) {
     setTotalPrice(calculatedTotal);
   }, [newElectric, oldElectric, newWater, oldWater, priceElectric, priceWater, priceRoom, priceGarbage]);
 
-  // Khởi động khi mở tab tạo mới
   const handleOpenCreate = () => {
     if (rooms.length > 0) {
-      setRoomId(rooms[0].id.toString());
+      const sorted = [...rooms].sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}));
+      setRoomId(sorted[0].id.toString());
     }
     setRentMonth(new Date().getMonth() + 1);
     setNote('');
@@ -105,15 +129,15 @@ export default function Bills({ bills, rooms, onSaveBill, onDeleteBill }) {
   const handleCalculateSave = (e) => {
     e.preventDefault();
     if (!roomId || rooms.length === 0) {
-      alert('Vui lòng tạo ít nhất một phòng trọ trong tab "Phòng trọ" trước khi tính tiền!');
+      window.showAlert('Vui lòng tạo ít nhất một phòng trọ trong tab "Phòng trọ" trước khi tính tiền!', 'THIẾU PHÒNG TRỌ', 'warning');
       return;
     }
     if (Number(newElectric) < Number(oldElectric)) {
-      alert('Số điện mới không được nhỏ hơn số điện cũ!');
+      window.showAlert('Số điện mới không được nhỏ hơn số điện cũ!', 'CHỈ SỐ HỢP LỆ', 'error');
       return;
     }
     if (Number(newWater) < Number(oldWater)) {
-      alert('Số nước mới không được nhỏ hơn số nước cũ!');
+      window.showAlert('Số nước mới không được nhỏ hơn số nước cũ!', 'CHỈ SỐ HỢP LỆ', 'error');
       return;
     }
 
@@ -140,7 +164,7 @@ export default function Bills({ bills, rooms, onSaveBill, onDeleteBill }) {
     // Tự động mở hóa đơn vừa tạo để xem chi tiết
     // (Tìm id lớn nhất hoặc hóa đơn mới nhất vừa lưu)
     setTimeout(() => {
-      alert('Lưu hóa đơn và tính tiền thành công!');
+      window.showToast('Lưu hóa đơn và tính tiền thành công!', 'success');
     }, 100);
   };
 
@@ -201,7 +225,7 @@ export default function Bills({ bills, rooms, onSaveBill, onDeleteBill }) {
         }
       } catch (err) {
         console.error("Lỗi quét chỉ số điện nước:", err);
-        alert("Không thể nhận diện ảnh chụp. Vui lòng thử chụp lại rõ nét hơn hoặc nhập tay.");
+        window.showAlert("Không thể nhận diện ảnh chụp. Vui lòng thử chụp lại rõ nét hơn hoặc nhập tay.", "LỖI QUÉT ẢNH", "error");
       } finally {
         setOcrLoading(false);
       }
@@ -250,15 +274,14 @@ Chi tiết dịch vụ:
 📞 Liên hệ chủ nhà: Đoàn Văn Cường (0985626739)
 Cảm ơn bạn đã thanh toán đúng hạn! 🙏`;
 
-    navigator.clipboard.writeText(shareText);
-    alert('Đã sao chép nội dung tóm tắt hóa đơn! Bạn có thể dán (Paste) để gửi ngay qua Zalo hoặc SMS cho khách thuê.');
+    window.showToast('Đã sao chép nội dung tóm tắt hóa đơn! Bạn có thể dán (Paste) để gửi ngay qua Zalo hoặc SMS cho khách thuê.', 'success');
   };
 
   // Trình in Offline: Kết xuất phiếu in HTML và mở trình in PDF của trình duyệt
   const openOfflinePrint = (bill, rName) => {
     const printWindow = window.open('', '_blank', 'width=800,height=700');
     if (!printWindow) {
-      alert('Trình duyệt đã chặn cửa sổ bật lên. Vui lòng cấp quyền Pop-up để xuất PDF!');
+      window.showAlert('Trình duyệt đã chặn cửa sổ bật lên. Vui lòng cấp quyền Pop-up để xuất PDF!', 'CHẶN POPUP', 'warning');
       return;
     }
 
@@ -394,7 +417,7 @@ Cảm ơn bạn đã thanh toán đúng hạn! 🙏`;
         window.URL.revokeObjectURL(fileUrl);
       } catch (err) {
         console.error("Lỗi tải PDF từ server:", err);
-        alert(`Không thể tải PDF trực tiếp từ máy chủ: ${err.message || 'Lỗi kết nối.'}\nỨng dụng sẽ tự động chuyển sang chế độ in offline.`);
+        window.showAlert(`Không thể tải PDF trực tiếp từ máy chủ: ${err.message || 'Lỗi kết nối.'}\nỨng dụng sẽ tự động chuyển sang chế độ in offline.`, 'TẢI PDF THẤT BẠI', 'warning');
         // Tự động chuyển hướng sang chế độ in Offline nếu API xảy ra lỗi hoặc token không hợp lệ
         openOfflinePrint(bill, rName);
       }
@@ -408,7 +431,7 @@ Cảm ơn bạn đã thanh toán đúng hạn! 🙏`;
   const handleOfflineBulkPrint = (ids) => {
     const printWindow = window.open('', '_blank', 'width=800,height=700');
     if (!printWindow) {
-      alert('Trình duyệt đã chặn cửa sổ bật lên. Vui lòng cấp quyền Pop-up để xuất PDF!');
+      window.showAlert('Trình duyệt đã chặn cửa sổ bật lên. Vui lòng cấp quyền Pop-up để xuất PDF!', 'CHẶN POPUP', 'warning');
       return;
     }
 
@@ -572,12 +595,12 @@ Cảm ơn bạn đã thanh toán đúng hạn! 🙏`;
           // Thêm độ trễ nhỏ (350ms) để trình duyệt xử lý kịp nhiều file tải xuống
           await new Promise(resolve => setTimeout(resolve, 350));
         }
-        alert('Đã tải xuống thành công tất cả hóa đơn đã chọn!');
+        window.showToast('Đã tải xuống thành công tất cả hóa đơn đã chọn!', 'success');
         setBulkMode(false);
         setSelectedBillIds([]);
       } catch (err) {
         console.error("Lỗi xuất PDF hàng loạt:", err);
-        alert(`Lỗi khi tải PDF trực tiếp: ${err.message || 'Lỗi kết nối.'}\nỨng dụng sẽ tự động chuyển sang chế độ in Offline gộp chung tất cả hóa đơn đã chọn!`);
+        window.showAlert(`Lỗi khi tải PDF trực tiếp: ${err.message || 'Lỗi kết nối.'}\nỨng dụng sẽ tự động chuyển sang chế độ in Offline gộp chung tất cả hóa đơn đã chọn!`, 'XUẤT BẢN THẤT BẠI', 'warning');
         // Fallback gộp chung trong 1 cửa sổ in
         handleOfflineBulkPrint(selectedBillIds);
       } finally {
@@ -759,13 +782,7 @@ Cảm ơn bạn đã thanh toán đúng hạn! 🙏`;
                   <button
                     type="button"
                     onClick={() => {
-                      const filteredIds = [...bills]
-                        .filter((b) => {
-                          const matchesRoom = filterRoomId === 'all' || Number(b.room_id) === Number(filterRoomId);
-                          const matchesMonth = filterMonth === 'all' || Number(b.rent_month) === Number(filterMonth);
-                          return matchesRoom && matchesMonth;
-                        })
-                        .map(b => b.id);
+                      const filteredIds = filteredBills.map(b => b.id);
                       
                       if (selectedBillIds.length === filteredIds.length) {
                         setSelectedBillIds([]);
@@ -776,11 +793,7 @@ Cảm ơn bạn đã thanh toán đúng hạn! 🙏`;
                     style={styles.btnBulkSelectAll}
                     className="tap-effect"
                   >
-                    {selectedBillIds.length === [...bills].filter(b => {
-                      const matchesRoom = filterRoomId === 'all' || Number(b.room_id) === Number(filterRoomId);
-                      const matchesMonth = filterMonth === 'all' || Number(b.rent_month) === Number(filterMonth);
-                      return matchesRoom && matchesMonth;
-                    }).length ? 'Hủy chọn tất cả' : 'Chọn tất cả'}
+                    {selectedBillIds.length === filteredBills.length ? 'Hủy chọn tất cả' : 'Chọn tất cả'}
                   </button>
 
                   <button
@@ -799,6 +812,25 @@ Cảm ơn bạn đã thanh toán đúng hạn! 🙏`;
                 </div>
               )}
 
+              {/* Thanh Tìm kiếm nhanh */}
+              <div style={styles.searchSection}>
+                <div style={styles.searchBox}>
+                  <Search size={16} color="var(--text-muted)" style={{ marginLeft: '10px' }} />
+                  <input
+                    type="text"
+                    placeholder="Tìm hóa đơn theo phòng, ghi chú..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={styles.searchInput}
+                  />
+                  {searchTerm && (
+                    <button onClick={() => setSearchTerm('')} style={styles.searchClearBtn} className="tap-effect">
+                      <X size={14} color="var(--text-muted)" />
+                    </button>
+                  )}
+                </div>
+              </div>
+
               {/* Thanh bộ lọc lịch sử trọ */}
               <div style={styles.filterBar}>
                 <select
@@ -810,7 +842,7 @@ Cảm ơn bạn đã thanh toán đúng hạn! 🙏`;
                   style={styles.filterSelect}
                 >
                   <option value="all">Tất cả phòng</option>
-                  {rooms.map(room => (
+                  {[...rooms].sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true})).map(room => (
                     <option key={room.id} value={room.id}>{room.name}</option>
                   ))}
                 </select>
@@ -832,13 +864,6 @@ Cảm ơn bạn đã thanh toán đúng hạn! 🙏`;
 
               {/* Danh sách hóa đơn đã được lọc */}
               {(() => {
-                const filteredBills = [...bills]
-                  .filter((bill) => {
-                    const matchesRoom = filterRoomId === 'all' || Number(bill.room_id) === Number(filterRoomId);
-                    const matchesMonth = filterMonth === 'all' || Number(bill.rent_month) === Number(filterMonth);
-                    return matchesRoom && matchesMonth;
-                  })
-                  .sort((a, b) => new Date(b.at) - new Date(a.at));
 
                 if (filteredBills.length === 0) {
                   return (
@@ -925,7 +950,7 @@ Cảm ơn bạn đã thanh toán đúng hạn! 🙏`;
               style={styles.select}
               required
             >
-              {rooms.map(room => (
+              {[...rooms].sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true})).map(room => (
                 <option key={room.id} value={room.id}>{room.name}</option>
               ))}
             </select>
@@ -980,6 +1005,11 @@ Cảm ơn bạn đã thanh toán đúng hạn! 🙏`;
                     <Camera size={15} />
                   </button>
                 </div>
+                {newElectric !== '' && Number(newElectric) < Number(oldElectric) && (
+                  <div style={styles.inputWarning}>
+                    ⚠️ Số mới ({newElectric}) nhỏ hơn số cũ ({oldElectric})!
+                  </div>
+                )}
               </div>
             </div>
             <div style={styles.calcResults}>
@@ -1025,6 +1055,11 @@ Cảm ơn bạn đã thanh toán đúng hạn! 🙏`;
                     <Camera size={15} />
                   </button>
                 </div>
+                {newWater !== '' && Number(newWater) < Number(oldWater) && (
+                  <div style={styles.inputWarning}>
+                    ⚠️ Số mới ({newWater}) nhỏ hơn số cũ ({oldWater})!
+                  </div>
+                )}
               </div>
             </div>
             <div style={styles.calcResults}>
@@ -1770,5 +1805,54 @@ const styles = {
     fontWeight: '700',
     cursor: 'pointer',
     boxShadow: '0 4px 10px rgba(99, 102, 241, 0.25)',
+  },
+  inputWarning: {
+    color: '#f43f5e',
+    fontSize: '11px',
+    fontWeight: '600',
+    marginTop: '6px',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '4px',
+    width: '100%',
+  },
+  searchSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+    marginBottom: '10px',
+    width: '100%',
+  },
+  searchBox: {
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: 'var(--bg-input)',
+    border: '1px solid var(--border-light)',
+    borderRadius: '10px',
+    height: '36px',
+    position: 'relative',
+    width: '100%',
+    boxSizing: 'border-box',
+  },
+  searchInput: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    border: 'none',
+    outline: 'none',
+    color: 'var(--text-main)',
+    fontSize: '12px',
+    padding: '0 32px 0 8px',
+  },
+  searchClearBtn: {
+    position: 'absolute',
+    right: '8px',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '4px',
+    outline: 'none',
   },
 };

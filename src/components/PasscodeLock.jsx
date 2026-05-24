@@ -93,10 +93,6 @@ export default function PasscodeLock({ onUnlock }) {
             <Delete size={18} />
           </button>
         </div>
-
-        <div style={styles.tip}>
-          <span>💡 Mã khóa mặc định: <strong>2026</strong></span>
-        </div>
       </div>
     </div>
   );
@@ -109,7 +105,7 @@ const styles = {
     bottom: 0,
     left: 0,
     right: 0,
-    backgroundColor: '#090d16',
+    backgroundColor: 'var(--bg-dark)',
     zIndex: 9999,
     display: 'flex',
     alignItems: 'center',
@@ -146,7 +142,7 @@ const styles = {
   title: {
     fontSize: '18px',
     fontWeight: '800',
-    color: '#f8fafc',
+    color: 'var(--text-main)',
     letterSpacing: '1px',
     fontFamily: 'var(--font-heading)',
   },
@@ -195,7 +191,7 @@ const styles = {
     borderRadius: '50%',
     border: '1px solid var(--border-light)',
     backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    color: '#f8fafc',
+    color: 'var(--text-main)',
     fontSize: '20px',
     fontWeight: '700',
     cursor: 'pointer',

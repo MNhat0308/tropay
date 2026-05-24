@@ -51,6 +51,27 @@ export default function App() {
     sessionStorage.getItem('tropay_unlocked') === 'true'
   );
 
+  // Cấu hình Dialog & Toast thông minh toàn cục
+  const [alertConfig, setAlertConfig] = useState(null);
+  const [toastConfig, setToastConfig] = useState(null);
+
+  useEffect(() => {
+    window.showAlert = (message, title = 'THÔNG BÁO', type = 'info', onClose = null) => {
+      setAlertConfig({ title, message, type, onClose });
+    };
+    window.showToast = (message, type = 'success') => {
+      setToastConfig({ message, type });
+    };
+  }, []);
+
+  // Tự động tắt Toast sau 3 giây
+  useEffect(() => {
+    if (toastConfig) {
+      const timer = setTimeout(() => setToastConfig(null), 3000);
+      return () => clearTimeout(timer);
+    }
+  }, [toastConfig]);
+
   // Trạng thái cơ sở dữ liệu
   const [rooms, setRooms] = useState([]);
   const [tenants, setTenants] = useState([]);
@@ -95,7 +116,7 @@ export default function App() {
       // Khi lỗi đồng bộ xảy ra (mất mạng hoặc token hết hạn), thực hiện logout để đưa cấu hình về offline
       const updatedConfig = apiService.logout();
       setSyncConfig(updatedConfig);
-      alert(`Đồng bộ dữ liệu thất bại: ${err.message || 'Lỗi kết nối máy chủ.'}\nĐã quay về chế độ ngoại tuyến (Local DB).`);
+      window.showAlert(`Đồng bộ dữ liệu thất bại: ${err.message || 'Lỗi kết nối máy chủ.'}\nĐã quay về chế độ ngoại tuyến (Local DB).`, 'ĐỒNG BỘ THẤT BẠI', 'error');
     }
   };
 
@@ -257,6 +278,161 @@ export default function App() {
           <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
         </>
       )}
+
+      {/* Reusable Premium Custom Dialog & Toast */}
+      {alertConfig && (
+        <CustomAlertDialog
+          title={alertConfig.title}
+          message={alertConfig.message}
+          type={alertConfig.type}
+          onClose={() => {
+            if (alertConfig.onClose) alertConfig.onClose();
+            setAlertConfig(null);
+          }}
+        />
+      )}
+      {toastConfig && (
+        <CustomToast
+          message={toastConfig.message}
+          type={toastConfig.type}
+        />
+      )}
     </PhoneSimulator>
   );
 }
+
+// --- COMPONENT THÔNG BÁO DIALOG CAO CẤP ---
+function CustomAlertDialog({ title, message, type, onClose }) {
+  return (
+    <div style={alertStyles.overlay} className="animate-fade-in">
+      <div style={alertStyles.card} className="animate-slide-up">
+        <div style={alertStyles.header}>
+          <span style={alertStyles.emoji}>
+            {type === 'success' ? '✅' : type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '🔔'}
+          </span>
+          <h3 style={alertStyles.title}>{title}</h3>
+        </div>
+        <p style={alertStyles.message}>{message}</p>
+        <button onClick={onClose} style={alertStyles.closeBtn} className="tap-effect">
+          ĐỒNG Ý
+        </button>
+      </div>
+    </div>
+  );
+}
+
+// --- COMPONENT TOAST THÔNG BÁO NHANH ---
+function CustomToast({ message, type }) {
+  return (
+    <div style={alertStyles.toastContainer} className="animate-fade-in">
+      <div style={{
+        ...alertStyles.toastCard,
+        borderLeft: type === 'error' ? '4px solid #f43f5e' : '4px solid var(--primary)',
+      }}>
+        <span style={{ fontSize: '14px', display: 'flex', alignItems: 'center' }}>
+          {type === 'error' ? '❌' : '✅'}
+        </span>
+        <span style={alertStyles.toastText}>{message}</span>
+      </div>
+    </div>
+  );
+}
+
+const alertStyles = {
+  overlay: {
+    position: 'absolute',
+    top: 0,
+    bottom: 0,
+    left: 0,
+    right: 0,
+    backgroundColor: 'rgba(5, 7, 12, 0.65)',
+    backdropFilter: 'blur(8px)',
+    zIndex: 99999,
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '24px',
+    boxSizing: 'border-box',
+  },
+  card: {
+    width: '100%',
+    maxWidth: '300px',
+    backgroundColor: 'var(--bg-card)',
+    border: '1px solid var(--border-light)',
+    borderRadius: '20px',
+    padding: '20px',
+    boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4)',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '12px',
+    textAlign: 'center',
+  },
+  header: {
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    gap: '6px',
+  },
+  emoji: {
+    fontSize: '32px',
+    marginBottom: '4px',
+  },
+  title: {
+    fontSize: '13px',
+    fontWeight: '800',
+    color: 'var(--text-main)',
+    letterSpacing: '0.5px',
+    fontFamily: 'var(--font-heading)',
+    textTransform: 'uppercase',
+  },
+  message: {
+    fontSize: '12px',
+    color: 'var(--text-muted)',
+    lineHeight: '1.5',
+    margin: '4px 0 8px 0',
+    whiteSpace: 'pre-line',
+  },
+  closeBtn: {
+    width: '100%',
+    backgroundColor: 'var(--primary)',
+    color: 'var(--text-inverse)',
+    border: 'none',
+    borderRadius: '12px',
+    padding: '10px',
+    fontSize: '12px',
+    fontWeight: '700',
+    cursor: 'pointer',
+    boxShadow: '0 4px 10px var(--primary-glow)',
+  },
+  toastContainer: {
+    position: 'absolute',
+    top: '56px',
+    left: '16px',
+    right: '16px',
+    zIndex: 99998,
+    display: 'flex',
+    justifyContent: 'center',
+  },
+  toastCard: {
+    width: '100%',
+    maxWidth: '320px',
+    backgroundColor: 'var(--bg-card)',
+    border: '1px solid var(--border-light)',
+    borderRadius: '12px',
+    padding: '12px 16px',
+    boxShadow: '0 8px 24px rgba(0, 0, 0, 0.25)',
+    backdropFilter: 'blur(16px)',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '10px',
+    boxSizing: 'border-box',
+  },
+  toastText: {
+    fontSize: '11px',
+    fontWeight: '600',
+    color: 'var(--text-main)',
+    lineHeight: '1.4',
+    textAlign: 'left',
+  }
+};

@@ -1,9 +1,21 @@
 import React, { useState } from 'react';
-import { Plus, X, Trash2, Edit2, ShieldAlert } from 'lucide-react';
+import { Plus, X, Trash2, Edit2, ShieldAlert, Search } from 'lucide-react';
 
 export default function Rooms({ rooms, onSaveRoom, onDeleteRoom }) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingRoom, setEditingRoom] = useState(null);
+  
+  // Bộ lọc tìm kiếm nhanh
+  const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState('all');
+
+  const filteredRooms = [...rooms]
+    .filter(room => {
+      const matchesSearch = room.name.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = statusFilter === 'all' || room.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true}));
   
   // Các state cho form nhập liệu
   const [name, setName] = useState('');
@@ -85,54 +97,103 @@ export default function Rooms({ rooms, onSaveRoom, onDeleteRoom }) {
         </button>
       </div>
 
+      {/* Thanh Tìm kiếm & Bộ lọc thông minh */}
+      <div style={styles.searchSection}>
+        <div style={styles.searchBox}>
+          <Search size={16} color="var(--text-muted)" style={{ marginLeft: '10px' }} />
+          <input
+            type="text"
+            placeholder="Tìm phòng theo tên..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={styles.searchInput}
+          />
+          {searchTerm && (
+            <button onClick={() => setSearchTerm('')} style={styles.searchClearBtn} className="tap-effect">
+              <X size={14} color="var(--text-muted)" />
+            </button>
+          )}
+        </div>
+
+        {/* Bộ lọc ngang trạng thái */}
+        <div style={styles.filterTabs}>
+          {[
+            { id: 'all', label: 'Tất cả' },
+            { id: 'occupied', label: 'Đang thuê' },
+            { id: 'vacant', label: 'Trống' },
+            { id: 'repairing', label: 'Sửa chữa' }
+          ].map(tab => (
+            <button
+              key={tab.id}
+              onClick={() => setStatusFilter(tab.id)}
+              style={{
+                ...styles.filterTab,
+                backgroundColor: statusFilter === tab.id ? 'var(--primary)' : 'var(--bg-input)',
+                color: statusFilter === tab.id ? 'var(--text-inverse)' : 'var(--text-main)',
+                border: statusFilter === tab.id ? '1px solid var(--primary)' : '1px solid var(--border-light)',
+              }}
+              className="tap-effect"
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+      </div>
+
       {/* Danh sách phòng */}
       <div style={styles.list}>
-        {rooms.map((room) => {
-          const badge = getStatusBadgeStyle(room.status);
-          return (
-            <div key={room.id} style={styles.card}>
-              <div style={styles.cardHeader}>
-                <div style={styles.roomNameGroup}>
-                  <div style={{ ...styles.statusDot, backgroundColor: badge.color }} />
-                  <span style={styles.roomName}>{room.name}</span>
+        {filteredRooms.length > 0 ? (
+          filteredRooms.map((room) => {
+            const badge = getStatusBadgeStyle(room.status);
+            return (
+              <div key={room.id} style={styles.card}>
+                <div style={styles.cardHeader}>
+                  <div style={styles.roomNameGroup}>
+                    <div style={{ ...styles.statusDot, backgroundColor: badge.color }} />
+                    <span style={styles.roomName}>{room.name}</span>
+                  </div>
+                  <div style={{ ...styles.badge, color: badge.color, backgroundColor: badge.bgColor }}>
+                    {badge.label}
+                  </div>
                 </div>
-                <div style={{ ...styles.badge, color: badge.color, backgroundColor: badge.bgColor }}>
-                  {badge.label}
-                </div>
-              </div>
 
-              <div style={styles.cardContent}>
-                <div style={styles.priceRow}>
-                  <span style={styles.label}>Tiền phòng:</span>
-                  <span style={styles.value}>{formatVND(room.price_room)}</span>
+                <div style={styles.cardContent}>
+                  <div style={styles.priceRow}>
+                    <span style={styles.label}>Tiền phòng:</span>
+                    <span style={styles.value}>{formatVND(room.price_room)}</span>
+                  </div>
+                  <div style={styles.ratesGrid}>
+                    <div style={styles.rateItem}>
+                      <span style={styles.subLabel}>Điện:</span>
+                      <span style={styles.subVal}>{formatVND(room.price_electric)}/kWh</span>
+                    </div>
+                    <div style={styles.rateItem}>
+                      <span style={styles.subLabel}>Nước:</span>
+                      <span style={styles.subVal}>{formatVND(room.price_water)}/m³</span>
+                    </div>
+                    <div style={styles.rateItem}>
+                      <span style={styles.subLabel}>Rác:</span>
+                      <span style={styles.subVal}>{formatVND(room.price_garbage)}/tháng</span>
+                    </div>
+                  </div>
                 </div>
-                <div style={styles.ratesGrid}>
-                  <div style={styles.rateItem}>
-                    <span style={styles.subLabel}>Điện:</span>
-                    <span style={styles.subVal}>{formatVND(room.price_electric)}/kWh</span>
-                  </div>
-                  <div style={styles.rateItem}>
-                    <span style={styles.subLabel}>Nước:</span>
-                    <span style={styles.subVal}>{formatVND(room.price_water)}/m³</span>
-                  </div>
-                  <div style={styles.rateItem}>
-                    <span style={styles.subLabel}>Rác:</span>
-                    <span style={styles.subVal}>{formatVND(room.price_garbage)}/tháng</span>
-                  </div>
-                </div>
-              </div>
 
-              <div style={styles.cardActions}>
-                <button onClick={() => handleOpenEdit(room)} style={styles.actionEdit} className="tap-effect">
-                  <Edit2 size={14} /> Sửa giá
-                </button>
-                <button onClick={() => handleDelete(room.id)} style={styles.actionDelete} className="tap-effect">
-                  <Trash2 size={14} /> Xóa
-                </button>
+                <div style={styles.cardActions}>
+                  <button onClick={() => handleOpenEdit(room)} style={styles.actionEdit} className="tap-effect">
+                    <Edit2 size={14} /> Sửa giá
+                  </button>
+                  <button onClick={() => handleDelete(room.id)} style={styles.actionDelete} className="tap-effect">
+                    <Trash2 size={14} /> Xóa
+                  </button>
+                </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })
+        ) : (
+          <div style={styles.emptyState}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Không có phòng nào khớp bộ lọc.</p>
+          </div>
+        )}
       </div>
 
       {/* Modal Thêm / Sửa Phòng */}
@@ -466,5 +527,67 @@ const styles = {
     cursor: 'pointer',
     marginTop: '10px',
     boxShadow: '0 4px 12px var(--primary-glow)',
+  },
+  searchSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+    marginBottom: '4px',
+  },
+  searchBox: {
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: 'var(--bg-input)',
+    border: '1px solid var(--border-light)',
+    borderRadius: '10px',
+    height: '36px',
+    position: 'relative',
+  },
+  searchInput: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    border: 'none',
+    outline: 'none',
+    color: 'var(--text-main)',
+    fontSize: '13px',
+    padding: '0 32px 0 8px',
+  },
+  searchClearBtn: {
+    position: 'absolute',
+    right: '8px',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '4px',
+    outline: 'none',
+  },
+  filterTabs: {
+    display: 'flex',
+    gap: '6px',
+    overflowX: 'auto',
+    paddingBottom: '4px',
+  },
+  filterTab: {
+    fontSize: '11px',
+    fontWeight: '700',
+    padding: '6px 12px',
+    borderRadius: '8px',
+    cursor: 'pointer',
+    whiteSpace: 'nowrap',
+    transition: 'all 0.2s ease',
+  },
+  emptyState: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: '30px 10px',
+    textAlign: 'center',
+    backgroundColor: 'var(--bg-card)',
+    border: '1px solid var(--border-light)',
+    borderRadius: '16px',
+    width: '100%',
   }
 };

@@ -68,7 +68,7 @@ export default function Settings({ syncConfig, onUpdateSyncConfig, onResetData, 
   const handleReset = () => {
     if (window.confirm('Bạn có chắc chắn muốn đặt lại cơ sở dữ liệu? Tất cả dữ liệu thêm mới sẽ quay về dữ liệu mẫu mặc định.')) {
       onResetData();
-      alert('Đã đặt lại dữ liệu mẫu thành công!');
+      window.showToast('Đã đặt lại dữ liệu mẫu thành công!', 'success');
     }
   };
 

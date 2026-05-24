@@ -1,9 +1,23 @@
 import React, { useState } from 'react';
-import { Plus, X, Trash2, Edit2, Phone, MessageCircle, Calendar } from 'lucide-react';
+import { Plus, X, Trash2, Edit2, Phone, MessageCircle, Calendar, Search } from 'lucide-react';
 
 export default function Tenants({ tenants, rooms, onSaveTenant, onDeleteTenant }) {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingTenant, setEditingTenant] = useState(null);
+
+  // Bộ lọc tìm kiếm nhanh
+  const [searchTerm, setSearchTerm] = useState('');
+
+  const filteredTenants = tenants.filter(t => {
+    const rName = rooms.find(r => r.id === t.room_id)?.name || '';
+    const query = searchTerm.toLowerCase();
+    return (
+      t.name.toLowerCase().includes(query) ||
+      (t.phone && t.phone.toLowerCase().includes(query)) ||
+      (t.identification && t.identification.toLowerCase().includes(query)) ||
+      rName.toLowerCase().includes(query)
+    );
+  });
 
   // Form states
   const [name, setName] = useState('');
@@ -19,7 +33,7 @@ export default function Tenants({ tenants, rooms, onSaveTenant, onDeleteTenant }
 
   const handleOpenAdd = () => {
     if (rooms.length === 0) {
-      alert('Vui lòng tạo ít nhất một phòng trọ trong tab "Phòng trọ" trước khi thêm khách thuê!');
+      window.showAlert('Vui lòng tạo ít nhất một phòng trọ trong tab "Phòng trọ" trước khi thêm khách thuê!', 'THIẾU PHÒNG TRỌ', 'warning');
       return;
     }
     setName('');
@@ -55,7 +69,7 @@ export default function Tenants({ tenants, rooms, onSaveTenant, onDeleteTenant }
   const handleSubmit = (e) => {
     e.preventDefault();
     if (!roomId || rooms.length === 0) {
-      alert('Vui lòng tạo phòng trọ trong tab "Phòng trọ" trước khi thêm khách thuê!');
+      window.showAlert('Vui lòng tạo phòng trọ trong tab "Phòng trọ" trước khi thêm khách thuê!', 'THIẾU PHÒNG TRỌ', 'warning');
       return;
     }
     const payload = {
@@ -93,68 +107,93 @@ export default function Tenants({ tenants, rooms, onSaveTenant, onDeleteTenant }
 
   return (
     <div style={styles.container} className="animate-slide-up">
-      {/* Nút thêm khách thuê */}
+      {/* Nút thêm khách nổi bật ở trên */}
       <div style={styles.topBar}>
-        <span style={styles.countText}>Đang ở: {tenants.length} khách thuê</span>
+        <span style={styles.countText}>Tổng số: {tenants.length} khách thuê</span>
         <button onClick={handleOpenAdd} style={styles.addBtn} className="tap-effect">
           <Plus size={16} /> Thêm khách thuê
         </button>
       </div>
 
+      {/* Thanh Tìm kiếm nhanh */}
+      <div style={styles.searchSection}>
+        <div style={styles.searchBox}>
+          <Search size={16} color="var(--text-muted)" style={{ marginLeft: '10px' }} />
+          <input
+            type="text"
+            placeholder="Tìm theo tên khách, phòng, SĐT, CCCD..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={styles.searchInput}
+          />
+          {searchTerm && (
+            <button onClick={() => setSearchTerm('')} style={styles.searchClearBtn} className="tap-effect">
+              <X size={14} color="var(--text-muted)" />
+            </button>
+          )}
+        </div>
+      </div>
+
       {/* Danh sách khách thuê */}
       <div style={styles.list}>
-        {tenants.map((tenant) => (
-          <div key={tenant.id} style={styles.card}>
-            <div style={styles.cardHeader}>
-              <div style={styles.avatarGroup}>
-                <div style={styles.avatar}>
-                  {tenant.name.split(' ').pop().charAt(0).toUpperCase()}
+        {filteredTenants.length > 0 ? (
+          filteredTenants.map((tenant) => (
+            <div key={tenant.id} style={styles.card}>
+              <div style={styles.cardHeader}>
+                <div style={styles.avatarGroup}>
+                  <div style={styles.avatar}>
+                    {tenant.name.split(' ').pop().charAt(0).toUpperCase()}
+                  </div>
+                  <div>
+                    <h4 style={styles.tenantName}>{tenant.name}</h4>
+                    <span style={styles.roomBadge}>{getRoomName(tenant.room_id)}</span>
+                  </div>
                 </div>
-                <div>
-                  <h4 style={styles.tenantName}>{tenant.name}</h4>
-                  <span style={styles.roomBadge}>{getRoomName(tenant.room_id)}</span>
+                
+                <div style={styles.actionsRight}>
+                  <button onClick={() => handleOpenEdit(tenant)} style={styles.iconBtn} className="tap-effect">
+                    <Edit2 size={13} color="var(--text-muted)" />
+                  </button>
+                  <button onClick={() => handleDelete(tenant.id)} style={styles.iconBtn} className="tap-effect">
+                    <Trash2 size={13} color="#f43f5e" />
+                  </button>
                 </div>
               </div>
-              
-              <div style={styles.actionsRight}>
-                <button onClick={() => handleOpenEdit(tenant)} style={styles.iconBtn} className="tap-effect">
-                  <Edit2 size={13} color="var(--text-muted)" />
-                </button>
-                <button onClick={() => handleDelete(tenant.id)} style={styles.iconBtn} className="tap-effect">
-                  <Trash2 size={13} color="#f43f5e" />
-                </button>
-              </div>
-            </div>
 
-            <div style={styles.cardContent}>
-              <div style={styles.infoRow}>
-                <Phone size={12} color="var(--text-muted)" />
-                <span style={styles.infoText}>{tenant.phone || 'Chưa cập nhật'}</span>
-              </div>
-              <div style={styles.infoRow}>
-                <Calendar size={12} color="var(--text-muted)" />
-                <span style={styles.infoText}>
-                  Hợp đồng: {tenant.start ? new Date(tenant.start).toLocaleDateString('vi-VN') : 'N/A'} - {tenant.end ? new Date(tenant.end).toLocaleDateString('vi-VN') : 'N/A'}
-                </span>
-              </div>
-              {tenant.note && (
-                <div style={styles.noteBox}>
-                  <span style={styles.noteText}>Ghi chú: {tenant.note}</span>
+              <div style={styles.cardContent}>
+                <div style={styles.infoRow}>
+                  <Phone size={12} color="var(--text-muted)" />
+                  <span style={styles.infoText}>{tenant.phone || 'Chưa cập nhật'}</span>
                 </div>
-              )}
-            </div>
+                <div style={styles.infoRow}>
+                  <Calendar size={12} color="var(--text-muted)" />
+                  <span style={styles.infoText}>
+                    Hợp đồng: {tenant.start ? new Date(tenant.start).toLocaleDateString('vi-VN') : 'N/A'} - {tenant.end ? new Date(tenant.end).toLocaleDateString('vi-VN') : 'N/A'}
+                  </span>
+                </div>
+                {tenant.note && (
+                  <div style={styles.noteBox}>
+                    <span style={styles.noteText}>Ghi chú: {tenant.note}</span>
+                  </div>
+                )}
+              </div>
 
-            {/* Các nút bấm liên hệ nhanh */}
-            <div style={styles.contactActions}>
-              <a href={`tel:${tenant.phone}`} style={styles.contactBtnPhone} className="tap-effect">
-                <Phone size={14} /> Gọi điện
-              </a>
-              <a href={`https://zalo.me/${tenant.phone}`} target="_blank" rel="noopener noreferrer" style={styles.contactBtnZalo} className="tap-effect">
-                <MessageCircle size={14} /> Zalo
-              </a>
+              {/* Các nút bấm liên hệ nhanh */}
+              <div style={styles.contactActions}>
+                <a href={`tel:${tenant.phone}`} style={styles.contactBtnPhone} className="tap-effect">
+                  <Phone size={14} /> Gọi điện
+                </a>
+                <a href={`https://zalo.me/${tenant.phone}`} target="_blank" rel="noopener noreferrer" style={styles.contactBtnZalo} className="tap-effect">
+                  <MessageCircle size={14} /> Zalo
+                </a>
+              </div>
             </div>
+          ))
+        ) : (
+          <div style={styles.emptyState}>
+            <p style={{ color: 'var(--text-muted)', fontSize: '13px' }}>Không có khách thuê nào khớp bộ lọc.</p>
           </div>
-        ))}
+        )}
       </div>
 
       {/* Modal Thêm / Sửa khách thuê */}
@@ -214,7 +253,7 @@ export default function Tenants({ tenants, rooms, onSaveTenant, onDeleteTenant }
                     onChange={(e) => setRoomId(e.target.value)}
                     style={styles.select}
                   >
-                    {rooms.map(room => (
+                    {[...rooms].sort((a, b) => a.name.localeCompare(b.name, undefined, {numeric: true})).map(room => (
                       <option key={room.id} value={room.id}>
                         {room.name} {room.status === 'vacant' ? '(Trống)' : '(Đang thuê)'}
                       </option>
@@ -550,5 +589,52 @@ const styles = {
     cursor: 'pointer',
     marginTop: '8px',
     boxShadow: '0 4px 12px var(--primary-glow)',
+  },
+  searchSection: {
+    display: 'flex',
+    flexDirection: 'column',
+    gap: '10px',
+    marginBottom: '4px',
+  },
+  searchBox: {
+    display: 'flex',
+    alignItems: 'center',
+    backgroundColor: 'var(--bg-input)',
+    border: '1px solid var(--border-light)',
+    borderRadius: '10px',
+    height: '36px',
+    position: 'relative',
+  },
+  searchInput: {
+    flex: 1,
+    backgroundColor: 'transparent',
+    border: 'none',
+    outline: 'none',
+    color: 'var(--text-main)',
+    fontSize: '13px',
+    padding: '0 32px 0 8px',
+  },
+  searchClearBtn: {
+    position: 'absolute',
+    right: '8px',
+    background: 'none',
+    border: 'none',
+    cursor: 'pointer',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    padding: '4px',
+    outline: 'none',
+  },
+  emptyState: {
+    display: 'flex',
+    justifyContent: 'center',
+    alignItems: 'center',
+    padding: '30px 10px',
+    textAlign: 'center',
+    backgroundColor: 'var(--bg-card)',
+    border: '1px solid var(--border-light)',
+    borderRadius: '16px',
+    width: '100%',
   }
 };
