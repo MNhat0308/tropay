@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { RefreshCw, Database, Radio, Wifi, ShieldCheck, HelpCircle } from 'lucide-react';
+import { RefreshCw, Database, Radio, Wifi, ShieldCheck, HelpCircle, Sun, Moon } from 'lucide-react';
 import { apiService } from '../services/apiService';
 
-export default function Settings({ syncConfig, onUpdateSyncConfig, onResetData }) {
+export default function Settings({ syncConfig, onUpdateSyncConfig, onResetData, theme, onToggleTheme }) {
   const [enabled, setEnabled] = useState(syncConfig?.enabled || false);
   const [apiUrl, setApiUrl] = useState(syncConfig?.apiUrl || 'http://core.house-bill.test/api');
-  const [email, setEmail] = useState('admin@gmail.com');
-  const [password, setPassword] = useState('12345678');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [statusMsg, setStatusMsg] = useState('');
 
@@ -38,20 +38,22 @@ export default function Settings({ syncConfig, onUpdateSyncConfig, onResetData }
         onUpdateSyncConfig(res.config);
         setStatusMsg('✅ Kết nối thành công! Đã cấp token đồng bộ từ Laravel.');
       } else {
-        // Dự phòng (FallBack) vì đây là môi trường mô phỏng di động cô lập
-        // Chúng tôi thiết lập thành công mô phỏng để người dùng trải nghiệm luồng làm việc
-        setTimeout(() => {
-          const mockSuccessConfig = {
-            enabled: true,
-            apiUrl,
-            token: 'sanctum_mock_token_fe_manage_house_9981'
-          };
-          onUpdateSyncConfig(mockSuccessConfig);
-          setStatusMsg('✅ Đăng nhập mô phỏng thành công! Đã kết nối với core.house-bill.test.');
-        }, 1200);
+        setStatusMsg(`❌ Kết nối thất bại: ${res.message || 'Tài khoản hoặc mật khẩu không hợp lệ.'}`);
+        onUpdateSyncConfig({
+          ...syncConfig,
+          apiUrl,
+          enabled: false,
+          token: ''
+        });
       }
     } catch (err) {
-      setStatusMsg('❌ Kết nối thất bại. Vui lòng kiểm tra lại Docker/máy chủ Laravel.');
+      setStatusMsg(`❌ Kết nối thất bại: ${err.message || 'Vui lòng kiểm tra lại máy chủ Laravel.'}`);
+      onUpdateSyncConfig({
+        ...syncConfig,
+        apiUrl,
+        enabled: false,
+        token: ''
+      });
     } finally {
       setLoading(false);
     }
@@ -72,6 +74,42 @@ export default function Settings({ syncConfig, onUpdateSyncConfig, onResetData }
 
   return (
     <div style={styles.container} className="animate-slide-up">
+      {/* 0. Giao diện Hệ thống */}
+      <div style={styles.card}>
+        <h3 style={styles.cardTitle}>🌓 GIAO DIỆN HỆ THỐNG</h3>
+        <div style={styles.themeRow}>
+          <span style={{ fontSize: '13px', fontWeight: '600', color: 'var(--text-main)', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            {theme === 'light' ? <Sun size={16} color="#f59e0b" /> : <Moon size={16} color="#38bdf8" />}
+            Chế độ giao diện
+          </span>
+          <button 
+            onClick={onToggleTheme}
+            style={{
+              ...styles.themeToggleBtn,
+              backgroundColor: theme === 'light' ? '#e2e8f0' : '#1e293b',
+              border: theme === 'light' ? '1px solid #cbd5e1' : '1px solid rgba(255, 255, 255, 0.08)',
+            }}
+            className="tap-effect"
+          >
+            <div style={{
+              ...styles.themeToggleThumb,
+              transform: theme === 'light' ? 'translateX(0px)' : 'translateX(34px)',
+              backgroundColor: theme === 'light' ? '#f59e0b' : '#38bdf8',
+            }}>
+              {theme === 'light' ? <Sun size={12} color="#fff" /> : <Moon size={12} color="#fff" />}
+            </div>
+            <span style={{
+              ...styles.themeToggleText,
+              color: theme === 'light' ? '#475569' : '#94a3b8',
+              paddingLeft: theme === 'light' ? '30px' : '0px',
+              paddingRight: theme === 'light' ? '0px' : '30px',
+            }}>
+              {theme === 'light' ? 'SÁNG' : 'TỐI'}
+            </span>
+          </button>
+        </div>
+      </div>
+
       {/* 1. Trạng thái kết nối */}
       <div style={styles.card}>
         <h3 style={styles.cardTitle}>🛰️ TRẠNG THÁI KẾT NỐI API</h3>
@@ -109,7 +147,6 @@ export default function Settings({ syncConfig, onUpdateSyncConfig, onResetData }
                 value={apiUrl}
                 onChange={(e) => setApiUrl(e.target.value)}
                 style={styles.input}
-                placeholder="http://core.house-bill.test/api"
               />
             </div>
 
@@ -202,7 +239,7 @@ const styles = {
   cardTitle: {
     fontSize: '12px',
     fontWeight: '700',
-    color: '#f8fafc',
+    color: 'var(--text-main)',
     letterSpacing: '0.5px',
     fontFamily: 'var(--font-heading)',
   },
@@ -234,7 +271,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '12px',
-    borderTop: '1px solid rgba(255, 255, 255, 0.04)',
+    borderTop: '1px solid var(--border-light)',
     paddingTop: '10px',
   },
   formGroup: {
@@ -252,13 +289,13 @@ const styles = {
     border: '1px solid var(--border-light)',
     borderRadius: '10px',
     padding: '8px 12px',
-    color: '#f8fafc',
+    color: 'var(--text-main)',
     fontSize: '13px',
     outline: 'none',
   },
   submitBtn: {
     backgroundColor: 'var(--primary)',
-    color: '#0f172a',
+    color: 'var(--text-inverse)',
     border: 'none',
     borderRadius: '12px',
     padding: '12px',
@@ -271,19 +308,19 @@ const styles = {
     justifyContent: 'center',
   },
   statusBox: {
-    backgroundColor: 'rgba(255, 255, 255, 0.03)',
-    border: '1px solid rgba(255, 255, 255, 0.06)',
+    backgroundColor: 'var(--bg-input)',
+    border: '1px solid var(--border-light)',
     borderRadius: '10px',
     padding: '8px 12px',
     fontSize: '11px',
-    color: '#e2e8f0',
+    color: 'var(--text-main)',
     lineHeight: '1.4',
   },
   connectedBox: {
     display: 'flex',
     flexDirection: 'column',
     gap: '12px',
-    borderTop: '1px solid rgba(255, 255, 255, 0.04)',
+    borderTop: '1px solid var(--border-light)',
     paddingTop: '10px',
   },
   connectedHeader: {
@@ -308,9 +345,9 @@ const styles = {
     cursor: 'pointer',
   },
   resetBtn: {
-    backgroundColor: 'rgba(255, 255, 255, 0.05)',
+    backgroundColor: 'var(--bg-input)',
     border: '1px solid var(--border-light)',
-    color: '#f8fafc',
+    color: 'var(--text-main)',
     borderRadius: '12px',
     padding: '10px',
     fontSize: '12px',
@@ -328,5 +365,44 @@ const styles = {
     fontSize: '10px',
     color: 'var(--text-muted)',
     marginTop: '10px',
+  },
+  themeRow: {
+    display: 'flex',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    padding: '4px 0',
+  },
+  themeToggleBtn: {
+    width: '68px',
+    height: '30px',
+    borderRadius: '15px',
+    cursor: 'pointer',
+    position: 'relative',
+    display: 'flex',
+    alignItems: 'center',
+    padding: '2px',
+    transition: 'all 0.3s cubic-bezier(0.16, 1, 0.3, 1)',
+    overflow: 'hidden',
+  },
+  themeToggleThumb: {
+    width: '24px',
+    height: '24px',
+    borderRadius: '50%',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    position: 'absolute',
+    left: '3px',
+    transition: 'transform 0.3s cubic-bezier(0.16, 1, 0.3, 1), background-color 0.3s ease',
+    boxShadow: '0 1px 3px rgba(0,0,0,0.15)',
+  },
+  themeToggleText: {
+    fontSize: '9px',
+    fontWeight: '800',
+    width: '100%',
+    textAlign: 'center',
+    userSelect: 'none',
+    letterSpacing: '0.5px',
+    transition: 'all 0.3s ease',
   }
 };

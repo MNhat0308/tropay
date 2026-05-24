@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import PhoneSimulator from './components/PhoneSimulator';
 import ScreenWrapper from './components/ScreenWrapper';
 import BottomNav from './components/BottomNav';
+import PasscodeLock from './components/PasscodeLock';
 
 // Nạp các Views chính
 import Dashboard from './views/Dashboard';
@@ -31,8 +32,25 @@ import { apiService } from './services/apiService';
 import './App.css';
 
 export default function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [theme, setTheme] = useState(
+    () => localStorage.getItem('tropay_theme') || 'dark'
+  );
   
+  // Áp dụng lớp CSS và lưu cấu hình giao diện
+  useEffect(() => {
+    if (theme === 'light') {
+      document.documentElement.classList.add('light-theme');
+    } else {
+      document.documentElement.classList.remove('light-theme');
+    }
+    localStorage.setItem('tropay_theme', theme);
+  }, [theme]);
+
+  const [activeTab, setActiveTab] = useState('dashboard');
+  const [isUnlocked, setIsUnlocked] = useState(
+    sessionStorage.getItem('tropay_unlocked') === 'true'
+  );
+
   // Trạng thái cơ sở dữ liệu
   const [rooms, setRooms] = useState([]);
   const [tenants, setTenants] = useState([]);
@@ -74,6 +92,10 @@ export default function App() {
       console.log("✅ Đồng bộ dữ liệu thành công từ core.house-bill.test!");
     } catch (err) {
       console.error("Lỗi đồng bộ API Laravel:", err);
+      // Khi lỗi đồng bộ xảy ra (mất mạng hoặc token hết hạn), thực hiện logout để đưa cấu hình về offline
+      const updatedConfig = apiService.logout();
+      setSyncConfig(updatedConfig);
+      alert(`Đồng bộ dữ liệu thất bại: ${err.message || 'Lỗi kết nối máy chủ.'}\nĐã quay về chế độ ngoại tuyến (Local DB).`);
     }
   };
 
@@ -211,6 +233,8 @@ export default function App() {
             syncConfig={syncConfig}
             onUpdateSyncConfig={handleUpdateSyncConfig}
             onResetData={handleResetData}
+            theme={theme}
+            onToggleTheme={() => setTheme(prev => prev === 'light' ? 'dark' : 'light')}
           />
         );
       default:
@@ -220,10 +244,19 @@ export default function App() {
 
   return (
     <PhoneSimulator>
-      <ScreenWrapper title={getTabTitle()} scrollable={true}>
-        {renderTabContent()}
-      </ScreenWrapper>
-      <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+      {!isUnlocked ? (
+        <PasscodeLock onUnlock={() => {
+          sessionStorage.setItem('tropay_unlocked', 'true');
+          setIsUnlocked(true);
+        }} />
+      ) : (
+        <>
+          <ScreenWrapper title={getTabTitle()} scrollable={true}>
+            {renderTabContent()}
+          </ScreenWrapper>
+          <BottomNav activeTab={activeTab} setActiveTab={setActiveTab} />
+        </>
+      )}
     </PhoneSimulator>
   );
 }

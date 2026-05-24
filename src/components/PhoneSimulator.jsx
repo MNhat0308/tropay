@@ -32,7 +32,7 @@ export default function PhoneSimulator({ children }) {
 
   if (isMobile) {
     return (
-      <div style={{ width: '100vw', height: '100vh', backgroundColor: '#090d16', position: 'relative', overflow: 'hidden' }}>
+      <div style={{ width: '100vw', height: '100vh', backgroundColor: 'var(--bg-dark)', position: 'relative', overflow: 'hidden' }}>
         {children}
       </div>
     );
@@ -64,17 +64,17 @@ export default function PhoneSimulator({ children }) {
             <div style={styles.statusIcons}>
               {/* Cột sóng */}
               <svg width="17" height="11" viewBox="0 0 17 11" fill="none" style={styles.statusIcon}>
-                <rect x="0" y="8" width="2.5" height="3" rx="0.5" fill="#f8fafc" />
-                <rect x="3.5" y="6" width="2.5" height="5" rx="0.5" fill="#f8fafc" />
-                <rect x="7" y="4" width="2.5" height="7" rx="0.5" fill="#f8fafc" />
-                <rect x="10.5" y="2" width="2.5" height="9" rx="0.5" fill="#f8fafc" />
-                <rect x="14" y="0" width="2.5" height="11" rx="0.5" fill="#f8fafc" />
+                <rect x="0" y="8" width="2.5" height="3" rx="0.5" fill="var(--text-main)" />
+                <rect x="3.5" y="6" width="2.5" height="5" rx="0.5" fill="var(--text-main)" />
+                <rect x="7" y="4" width="2.5" height="7" rx="0.5" fill="var(--text-main)" />
+                <rect x="10.5" y="2" width="2.5" height="9" rx="0.5" fill="var(--text-main)" />
+                <rect x="14" y="0" width="2.5" height="11" rx="0.5" fill="var(--text-main)" />
               </svg>
               {/* Wifi */}
               <svg width="16" height="12" viewBox="0 0 16 12" fill="none" style={styles.statusIcon}>
-                <path d="M8 12C8.55228 12 9 11.5523 9 11C9 10.4477 8.55228 10 8 10C7.44772 10 7 10.4477 7 11C7 11.5523 7.44772 12 8 12Z" fill="#f8fafc"/>
-                <path d="M5.17157 8.17157C6.73367 6.60948 9.26633 6.60948 10.8284 8.17157C11.1097 8.4528 11.5654 8.4528 11.8466 8.17157C12.1278 7.89035 12.1278 7.43463 11.8466 7.1534C9.70295 5.00976 6.29705 5.00976 4.1534 7.1534C3.87217 7.43463 3.87217 7.89035 4.1534 8.17157C4.43463 8.4528 4.89035 8.4528 5.17157 8.17157Z" fill="#f8fafc"/>
-                <path d="M2.34315 5.34315C5.46734 2.21895 10.5327 2.21895 13.6569 5.34315C13.9381 5.62437 14.3938 5.62437 14.675 5.34315C14.9563 5.06192 14.9563 4.6062 14.675 4.32497C10.9701 0.620022 5.0299 0.620022 1.32497 4.32497C1.04375 4.6062 1.04375 5.06192 1.32497 5.34315C1.6062 5.62437 2.06192 5.62437 2.34315 5.34315Z" fill="#f8fafc"/>
+                <path d="M8 12C8.55228 12 9 11.5523 9 11C9 10.4477 8.55228 10 8 10C7.44772 10 7 10.4477 7 11C7 11.5523 7.44772 12 8 12Z" fill="var(--text-main)"/>
+                <path d="M5.17157 8.17157C6.73367 6.60948 9.26633 6.60948 10.8284 8.17157C11.1097 8.4528 11.5654 8.4528 11.8466 8.17157C12.1278 7.89035 12.1278 7.43463 11.8466 7.1534C9.70295 5.00976 6.29705 5.00976 4.1534 7.1534C3.87217 7.43463 3.87217 7.89035 4.1534 8.17157C4.43463 8.4528 4.89035 8.4528 5.17157 8.17157Z" fill="var(--text-main)"/>
+                <path d="M2.34315 5.34315C5.46734 2.21895 10.5327 2.21895 13.6569 5.34315C13.9381 5.62437 14.3938 5.62437 14.675 5.34315C14.9563 5.06192 14.9563 4.6062 14.675 4.32497C10.9701 0.620022 5.0299 0.620022 1.32497 4.32497C1.04375 4.6062 1.04375 5.06192 1.32497 5.34315C1.6062 5.62437 2.06192 5.62437 2.34315 5.34315Z" fill="var(--text-main)"/>
               </svg>
               {/* Pin */}
               <div style={styles.batteryContainer}>
@@ -108,7 +108,7 @@ const styles = {
     alignItems: 'center',
     width: '100vw',
     height: '100vh',
-    backgroundColor: '#05070c',
+    backgroundColor: 'var(--bg-dark)',
     position: 'relative',
     overflow: 'hidden',
   },
@@ -147,7 +147,7 @@ const styles = {
       inset 0 -4px 6px rgba(0, 0, 0, 0.4),
       0 0 0 2px rgba(255, 255, 255, 0.05)
     `,
-    backgroundColor: '#090d16',
+    backgroundColor: 'var(--bg-dark)',
     padding: '4px',
     display: 'flex',
     flexDirection: 'column',
@@ -158,7 +158,7 @@ const styles = {
     height: '100%',
     borderRadius: '44px',
     overflow: 'hidden',
-    backgroundColor: '#0f172a',
+    backgroundColor: 'var(--bg-app)',
     display: 'flex',
     flexDirection: 'column',
     boxShadow: 'inset 0 0 10px rgba(0,0,0,0.8)',
@@ -225,7 +225,7 @@ const styles = {
     padding: '0 28px 0 28px',
     fontSize: '13px',
     fontWeight: '600',
-    color: '#f8fafc',
+    color: 'var(--text-main)',
     letterSpacing: '-0.1px',
     position: 'absolute',
     top: 0,
@@ -253,7 +253,7 @@ const styles = {
   batteryBody: {
     width: '20px',
     height: '10px',
-    border: '1.5px solid #f8fafc',
+    border: '1.5px solid var(--text-main)',
     borderRadius: '3px',
     padding: '1px',
     opacity: 0.9,
@@ -267,7 +267,7 @@ const styles = {
   batteryTip: {
     width: '1.5px',
     height: '4px',
-    backgroundColor: '#f8fafc',
+    backgroundColor: 'var(--text-main)',
     borderRadius: '0 1px 1px 0',
     opacity: 0.9,
   },
@@ -299,7 +299,8 @@ const styles = {
   homeIndicator: {
     width: '120px',
     height: '4.5px',
-    backgroundColor: 'rgba(255, 255, 255, 0.4)',
+    backgroundColor: 'var(--text-main)',
+    opacity: 0.3,
     borderRadius: '2.5px',
   }
 };

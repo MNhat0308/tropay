@@ -47,7 +47,44 @@
   
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  
+  /* Chuyển động mượt mà cho đổi giao diện */
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
+
+:root.light-theme {
+  /* Bảng màu sáng cao cấp - Tinh tế, rõ ràng và mượt mà */
+  --bg-dark: #f1f5f9; /* Slate 100 - Nền ngoài giả lập dịu mát */
+  --bg-app: #ffffff;  /* Trắng tinh khiết - Nền bên trong điện thoại */
+  --bg-card: rgba(255, 255, 255, 0.85); /* Card kính trắng mờ */
+  --bg-card-hover: rgba(255, 255, 255, 0.95);
+  --bg-input: rgba(241, 245, 249, 0.8); /* Slate 200 rất mờ cho input */
+  
+  /* Viền và Bóng đổ */
+  --border-glow: rgba(0, 0, 0, 0.01);
+  --border-active: rgba(16, 185, 129, 0.6);
+  --border-light: rgba(15, 23, 42, 0.08); /* Viền mỏng tối dịu */
+  
+  /* Văn bản */
+  --text-main: #0f172a; /* Slate 900 cho độ tương phản sắc nét */
+  --text-muted: #64748b; /* Slate 500 */
+  --text-inverse: #ffffff; /* Văn bản trắng nổi bật trên nền tối (nút) */
+
+  color-scheme: light;
+  background-color: var(--bg-dark);
+  color: var(--text-main);
+}
+
+/* Áp dụng chuyển động chuyển đổi giao diện mượt mà cho toàn bộ thành phần chính */
+body, 
+div, 
+h1, h2, h3, h4, h5, h6, 
+p, span, label,
+button, input, select, textarea,
+svg {
+  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
 
 * {
   box-sizing: border-box;
@@ -138,4 +175,10 @@ body {
 
 .tap-effect {
   transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
 }

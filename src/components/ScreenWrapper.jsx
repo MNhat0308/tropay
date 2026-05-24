@@ -9,7 +9,7 @@ export default function ScreenWrapper({ title, onBack, rightAction, children, sc
         <div style={styles.leftContainer}>
           {onBack && (
             <button onClick={onBack} style={styles.iconButton} className="tap-effect">
-              <ArrowLeft size={22} color="#f8fafc" />
+              <ArrowLeft size={22} color="var(--text-main)" />
             </button>
           )}
         </div>
@@ -35,7 +35,7 @@ const styles = {
     flexDirection: 'column',
     width: '100%',
     height: '100%',
-    backgroundColor: '#0f172a', // Nền ứng dụng sâu thẳm
+    backgroundColor: 'var(--bg-app)', // Nền ứng dụng sâu thẳm
     position: 'relative',
   },
   header: {
@@ -45,8 +45,8 @@ const styles = {
     justifyContent: 'space-between',
     alignItems: 'center',
     padding: '0 16px',
-    borderBottom: '1px solid rgba(255, 255, 255, 0.06)',
-    backgroundColor: 'rgba(15, 23, 42, 0.85)',
+    borderBottom: '1px solid var(--border-light)',
+    backgroundColor: 'var(--bg-app)',
     backdropFilter: 'blur(12px)',
     position: 'sticky',
     top: 0,
@@ -67,7 +67,7 @@ const styles = {
   title: {
     fontSize: '18px',
     fontWeight: '700',
-    color: '#f8fafc',
+    color: 'var(--text-main)',
     letterSpacing: '-0.3px',
     fontFamily: 'var(--font-heading)',
   },

@@ -369,7 +369,7 @@ const styles = {
   tenantName: {
     fontSize: '14px',
     fontWeight: '700',
-    color: '#f8fafc',
+    color: 'var(--text-main)',
   },
   roomBadge: {
     fontSize: '11px',
@@ -397,7 +397,7 @@ const styles = {
     display: 'flex',
     flexDirection: 'column',
     gap: '6px',
-    borderTop: '1px solid rgba(255, 255, 255, 0.04)',
+    borderTop: '1px solid var(--border-light)',
     paddingTop: '10px',
   },
   infoRow: {
@@ -471,7 +471,7 @@ const styles = {
   },
   modal: {
     width: '100%',
-    backgroundColor: '#0f172a',
+    backgroundColor: 'var(--bg-app)',
     borderTopLeftRadius: '24px',
     borderTopRightRadius: '24px',
     borderTop: '1px solid var(--border-light)',
@@ -490,7 +490,7 @@ const styles = {
   modalTitle: {
     fontSize: '16px',
     fontWeight: '700',
-    color: '#f8fafc',
+    color: 'var(--text-main)',
     fontFamily: 'var(--font-heading)',
   },
   closeBtn: {
@@ -525,7 +525,7 @@ const styles = {
     border: '1px solid var(--border-light)',
     borderRadius: '10px',
     padding: '8px 12px',
-    color: '#f8fafc',
+    color: 'var(--text-main)',
     fontSize: '13px',
     outline: 'none',
   },
@@ -534,14 +534,14 @@ const styles = {
     border: '1px solid var(--border-light)',
     borderRadius: '10px',
     padding: '8px 12px',
-    color: '#f8fafc',
+    color: 'var(--text-main)',
     fontSize: '13px',
     outline: 'none',
     width: '100%',
   },
   submitBtn: {
     backgroundColor: 'var(--primary)',
-    color: '#0f172a',
+    color: 'var(--text-inverse)',
     border: 'none',
     borderRadius: '12px',
     padding: '12px',

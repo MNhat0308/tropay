@@ -294,7 +294,7 @@ const styles = {
   roomName: {
     fontSize: '16px',
     fontWeight: '700',
-    color: '#f8fafc',
+    color: 'var(--text-main)',
     fontFamily: 'var(--font-heading)',
   },
   badge: {
@@ -342,7 +342,7 @@ const styles = {
   subVal: {
     fontSize: '11px',
     fontWeight: '600',
-    color: '#e2e8f0',
+    color: 'var(--text-main)',
   },
   cardActions: {
     display: 'flex',
@@ -387,7 +387,7 @@ const styles = {
   },
   modal: {
     width: '100%',
-    backgroundColor: '#0f172a',
+    backgroundColor: 'var(--bg-app)',
     borderTopLeftRadius: '24px',
     borderTopRightRadius: '24px',
     borderTop: '1px solid var(--border-light)',
@@ -406,7 +406,7 @@ const styles = {
   modalTitle: {
     fontSize: '16px',
     fontWeight: '700',
-    color: '#f8fafc',
+    color: 'var(--text-main)',
     fontFamily: 'var(--font-heading)',
   },
   closeBtn: {
@@ -441,7 +441,7 @@ const styles = {
     border: '1px solid var(--border-light)',
     borderRadius: '10px',
     padding: '10px 12px',
-    color: '#f8fafc',
+    color: 'var(--text-main)',
     fontSize: '14px',
     outline: 'none',
     transition: 'border-color 0.2s',
@@ -451,13 +451,13 @@ const styles = {
     border: '1px solid var(--border-light)',
     borderRadius: '10px',
     padding: '10px 12px',
-    color: '#f8fafc',
+    color: 'var(--text-main)',
     fontSize: '14px',
     outline: 'none',
   },
   submitBtn: {
     backgroundColor: 'var(--primary)',
-    color: '#0f172a',
+    color: 'var(--text-inverse)',
     border: 'none',
     borderRadius: '12px',
     padding: '12px',

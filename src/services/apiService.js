@@ -177,5 +177,34 @@ export const apiService = {
       console.error('Sync Bill Error:', error);
       throw error;
     }
+  },
+
+  // Tải file PDF từ server sử dụng token Sanctum dưới dạng Blob (để không cần đăng nhập session web)
+  async fetchBillPdfBlob(billId) {
+    const config = this.getConfig();
+    if (!config.enabled || !config.token) {
+      throw new Error('Đồng bộ API chưa được kích hoạt hoặc chưa đăng nhập.');
+    }
+
+    const url = `${config.apiUrl.replace(/\/$/, '')}/bill-rooms/${billId}/pdf`;
+    const response = await fetch(url, {
+      method: 'GET',
+      headers: {
+        'Accept': 'application/pdf',
+        'Authorization': `Bearer ${config.token}`
+      }
+    });
+
+    if (response.status === 401) {
+      this.logout();
+      throw new Error('Phiên làm việc đã hết hạn. Vui lòng đăng nhập lại.');
+    }
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw new Error(errData.message || `Lỗi máy chủ (${response.status})`);
+    }
+
+    return await response.blob();
   }
 };

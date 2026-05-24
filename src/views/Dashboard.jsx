@@ -119,7 +119,7 @@ const styles = {
   welcomeText: {
     fontSize: '20px',
     fontWeight: '800',
-    color: '#f8fafc',
+    color: 'var(--text-main)',
     fontFamily: 'var(--font-heading)',
   },
   subWelcome: {
@@ -141,7 +141,7 @@ const styles = {
   quickAddText: {
     fontSize: '13px',
     fontWeight: '700',
-    color: '#0f172a',
+    color: 'var(--text-inverse)',
   },
   kpiGrid: {
     display: 'grid',
@@ -182,7 +182,7 @@ const styles = {
   kpiValue: {
     fontSize: '18px',
     fontWeight: '800',
-    color: '#f8fafc',
+    color: 'var(--text-main)',
     letterSpacing: '-0.5px',
     margin: '4px 0',
   },
@@ -202,7 +202,7 @@ const styles = {
   sectionTitle: {
     fontSize: '15px',
     fontWeight: '700',
-    color: '#f8fafc',
+    color: 'var(--text-main)',
     fontFamily: 'var(--font-heading)',
   },
   seeAllBtn: {
@@ -239,7 +239,7 @@ const styles = {
   billRoom: {
     fontSize: '14px',
     fontWeight: '600',
-    color: '#f8fafc',
+    color: 'var(--text-main)',
   },
   billDate: {
     fontSize: '11px',

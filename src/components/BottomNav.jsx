@@ -34,7 +34,7 @@ export default function BottomNav({ activeTab, setActiveTab }) {
               </div>
               <span style={{
                 ...styles.label,
-                color: isActive ? '#f8fafc' : 'var(--text-muted)',
+                color: isActive ? 'var(--text-main)' : 'var(--text-muted)',
                 fontWeight: isActive ? '600' : '400',
               }}>
                 {tab.label}
@@ -54,9 +54,9 @@ const styles = {
     left: 0,
     right: 0,
     height: '66px',
-    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+    backgroundColor: 'var(--bg-card)',
     backdropFilter: 'blur(16px)',
-    borderTop: '1px solid rgba(255, 255, 255, 0.06)',
+    borderTop: '1px solid var(--border-light)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
